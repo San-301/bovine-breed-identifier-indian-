@@ -15,9 +15,57 @@ st.set_page_config(
 )
 
 # =========================
+# Custom CSS
+# =========================
+st.markdown("""
+<style>
+/* Sidebar */
+section[data-testid="stSidebar"] {
+    background-color: #ffffff;
+    color: black;
+    font-weight: bold;
+}
+section[data-testid="stSidebar"] .css-1d391kg {
+    color: black;
+}
+section[data-testid="stSidebar"] .stRadio > label:hover {
+    color: #2563eb;
+    cursor: pointer;
+}
+
+/* Sidebar option hover for Prediction tab */
+.stRadio label[for^="Model Prediction"] {
+    position: relative;
+}
+.stRadio label[for^="Model Prediction"]:hover::after {
+    content: " 🚀";
+}
+
+/* Breed card */
+.breed-card {
+    border-radius: 12px;
+    padding: 12px;
+    background-color: #f0f0f0;
+    margin-bottom: 10px;
+    overflow:auto;
+}
+
+/* Breed colored box */
+.breed-box {
+    display:inline-block;
+    padding:10px 15px;
+    margin:5px;
+    border-radius:8px;
+    color:white;
+    font-weight:bold;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
 # Paths
 # =========================
-MODEL_FILENAME = "breed_classifier_mobilenet.h5"  # Upload this to repo root
+MODEL_FILENAME = "breed_classifier_mobilenet.h5"
 MODEL_PATH = os.path.join(os.getcwd(), MODEL_FILENAME)
 BREED_JSON = os.path.join(os.getcwd(), "breeds.json")
 
@@ -55,7 +103,6 @@ def predict_top3(img_file):
     return [(class_names[i], float(preds[i])) for i in top3_idx]
 
 def display_breed_card(breed, prob):
-    """Display breed details in a styled card with visible text."""
     info = breed_info.get(breed, {})
     border_color = "#28a745" if prob>0.7 else "#ffc107" if prob>0.5 else "#dc3545"
     title_color = border_color
@@ -80,6 +127,11 @@ def display_breed_card(breed, prob):
     </div>
     """, unsafe_allow_html=True)
 
+def breed_box(breed, color="#2563eb"):
+    st.markdown(f"""
+        <div class="breed-box" style="background-color:{color}">{breed}</div>
+    """, unsafe_allow_html=True)
+
 # =========================
 # Sidebar Navigation
 # =========================
@@ -95,7 +147,7 @@ if choice == "Home":
     Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
     Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
     """)
-    st.image("https://www.google.com/imgres?q=bharat%20pashudhan%20app%20image&imgurl=https%3A%2F%2Fplay-lh.googleusercontent.com%2F3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg&imgrefurl=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.epashu.in&docid=nR_zlYug1jwyFM&tbnid=IfzwMgILouRwIM&vet=12ahUKEwiOk6f7wO6PAxW_1jgGHZl-CZIQM3oECB0QAA..i&w=512&h=512&hcb=2&ved=2ahUKEwiOk6f7wO6PAxW_1jgGHZl-CZIQM3oECB0QAA", use_column_width=True)
+    st.image("https://play-lh.googleusercontent.com/3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg", use_column_width=True)
 
 # =========================
 # About Page
@@ -104,38 +156,38 @@ elif choice == "About":
     st.title("ℹ️ About Breeds")
     st.markdown("### 🐂 Cattle Breeds")
     cattle_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "cattle"]
-    st.write(", ".join(cattle_breeds))
+    for breed in cattle_breeds:
+        breed_box(breed, color="#28a745")  # green boxes
     
     st.markdown("### 🐃 Buffalo Breeds")
     buffalo_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "buffalo"]
-    st.write(", ".join(buffalo_breeds))
+    for breed in buffalo_breeds:
+        breed_box(breed, color="#2563eb")  # blue boxes
 
 # =========================
 # Model Prediction
 # =========================
 elif choice == "Model Prediction":
     st.title("🔍 Predict Breed")
-    st.markdown("Upload an image or take a photo of a cow or buffalo to get top-3 breed predictions.")
+    st.markdown("Upload an image or use your camera to predict the breed.")
     
-    # Camera Input
-    captured_file = st.camera_input("📷 Take a picture")
-    
-    # File Upload
-    uploaded_file = st.file_uploader("📂 Or upload an image", type=["jpg","jpeg","png"])
-    
-    # Use whichever is available
-    img_source = captured_file if captured_file else uploaded_file
-    
-    if img_source and model:
-        st.image(img_source, caption="Input Image", use_column_width=True)
-        if st.button("Predict"):
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        uploaded_file = st.file_uploader("Upload an image", type=["jpg","jpeg","png"])
+    with col2:
+        camera_input = st.camera_input("Capture image")
+
+    img_file = uploaded_file if uploaded_file else camera_input
+
+    if img_file and model:
+        st.image(img_file, caption="Input Image", use_column_width=True)
+        if st.button("🚀 Predict"):
             with st.spinner("Predicting..."):
-                results = predict_top3(img_source)
+                results = predict_top3(img_file)
                 st.subheader("Top 3 Predictions")
                 cols = st.columns(3)
                 for i, (breed, prob) in enumerate(results):
                     with cols[i]:
                         display_breed_card(breed, prob)
-    elif img_source and not model:
+    elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
-
