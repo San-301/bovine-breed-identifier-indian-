@@ -95,7 +95,7 @@ if choice == "Home":
     Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
     Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
     """)
-    st.image("https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=1200&q=80", use_column_width=True)
+    st.image("https://www.google.com/imgres?q=bharat%20pashudhan%20app%20image&imgurl=https%3A%2F%2Fplay-lh.googleusercontent.com%2F3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg&imgrefurl=https%3A%2F%2Fplay.google.com%2Fstore%2Fapps%2Fdetails%3Fid%3Dcom.epashu.in&docid=nR_zlYug1jwyFM&tbnid=IfzwMgILouRwIM&vet=12ahUKEwiOk6f7wO6PAxW_1jgGHZl-CZIQM3oECB0QAA..i&w=512&h=512&hcb=2&ved=2ahUKEwiOk6f7wO6PAxW_1jgGHZl-CZIQM3oECB0QAA", use_column_width=True)
 
 # =========================
 # About Page
@@ -138,3 +138,4 @@ elif choice == "Model Prediction":
                         display_breed_card(breed, prob)
     elif img_source and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
+
