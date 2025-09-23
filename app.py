@@ -32,6 +32,11 @@ section[data-testid="stSidebar"] .stRadio label {
     font-size: 16px;
 }
 
+/* Force all sidebar text white */
+section[data-testid="stSidebar"] .stRadio div[role='radiogroup'] label p {
+    color: #ffffff !important;
+}
+
 /* Sidebar radio button hover effect */
 section[data-testid="stSidebar"] .stRadio label:hover {
     color: #2563eb !important; /* Hover color */
@@ -84,17 +89,16 @@ else:
     class_names = []
 
 # =========================
-# Load Model safely
+# Load Model silently
 # =========================
 model = None
 if os.path.exists(MODEL_PATH):
     try:
         model = tf.keras.models.load_model(MODEL_PATH, compile=False)  # Safe loading
-        st.success("Model loaded successfully!")
-    except Exception as e:
-        st.error(f"Failed to load model: {e}")
+    except Exception:
+        model = None
 else:
-    st.warning(f"Model not found at {MODEL_PATH}. Please upload it to the repo.")
+    model = None
 
 # =========================
 # Helper Functions
