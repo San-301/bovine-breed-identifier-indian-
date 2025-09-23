@@ -8,27 +8,35 @@ import os
 # =========================
 # Page Config
 # =========================
-st.set_page_config(page_title="Bovine Breed Identifier", layout="wide")
+st.set_page_config(
+    page_title="Bovine Breed Identifier",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
 
 # =========================
-# Model & Data Paths
+# Paths
 # =========================
-MODEL_FILENAME = "breed_classifier_mobilenet.h5"  # Upload this file to repo root
+MODEL_FILENAME = "breed_classifier_mobilenet.h5"  # Upload this to repo root
 MODEL_PATH = os.path.join(os.getcwd(), MODEL_FILENAME)
 BREED_JSON = os.path.join(os.getcwd(), "breeds.json")
 
-# Load breed info
+# =========================
+# Load Breed Info
+# =========================
 if os.path.exists(BREED_JSON):
     with open(BREED_JSON, "r") as f:
         breed_info = json.load(f)
-    # FIX: ensure alphabetical order (matches TensorFlow training order)
+    # Ensure alphabetical order matches model class indices
     class_names = sorted(breed_info.keys())
 else:
     st.error(f"Breed info JSON not found at {BREED_JSON}")
     breed_info = {}
     class_names = []
 
-# Load model safely
+# =========================
+# Load Model
+# =========================
 model = None
 if os.path.exists(MODEL_PATH):
     model = tf.keras.models.load_model(MODEL_PATH)
@@ -39,7 +47,6 @@ else:
 # Helper Functions
 # =========================
 def predict_top3(img_file):
-    """Predict top-3 breeds for an uploaded image."""
     img = image.load_img(img_file, target_size=(224,224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
@@ -49,11 +56,18 @@ def predict_top3(img_file):
     return [(class_names[i], float(preds[i])) for i in top3_idx]
 
 def display_breed_card(breed, prob):
-    """Display breed details in a styled card."""
     info = breed_info.get(breed, {})
     color = "#28a745" if prob>0.7 else "#ffc107" if prob>0.5 else "#dc3545"
     st.markdown(f"""
-    <div style="border:2px solid {color}; padding:15px; border-radius:12px; margin-bottom:10px; background-color:#f9f9f9">
+    <div style="
+        border:2px solid {color};
+        padding:15px;
+        border-radius:12px;
+        margin-bottom:10px;
+        background-color:#f9f9f9;
+        overflow:auto;
+        word-wrap: break-word;
+        max-height: 200px;">
         <h3 style="color:{color}">{breed} - {prob*100:.2f}%</h3>
         <b>Type:</b> {info.get('Type','N/A')}<br>
         <b>Origin:</b> {info.get('Origin','N/A')}<br>
@@ -64,7 +78,7 @@ def display_breed_card(breed, prob):
 # =========================
 # Sidebar Navigation
 # =========================
-menu = ["Home", "Model Demo", "About"]
+menu = ["Home", "About", "Model Prediction"]
 choice = st.sidebar.radio("Navigation", menu)
 
 # =========================
@@ -72,57 +86,41 @@ choice = st.sidebar.radio("Navigation", menu)
 # =========================
 if choice == "Home":
     st.title("🐄 Indian Cattle & Buffalo Breed Identifier")
-    st.markdown("Upload an image of cattle or buffalo and get the **top-3 breed predictions**.")
-    
-    uploaded_file = st.file_uploader("Upload an image", type=["jpg","jpeg","png"])
-    
-    if uploaded_file and model:
-        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
-        if st.button("Predict Breed"):
-            with st.spinner("Predicting..."):
-                results = predict_top3(uploaded_file)
-                st.subheader("Top 3 Breed Predictions")
-                cols = st.columns(3)
-                for i, (breed, prob) in enumerate(results):
-                    with cols[i]:
-                        display_breed_card(breed, prob)
-
-# =========================
-# Model Demo Page
-# =========================
-elif choice == "Model Demo":
-    st.title("📊 Model Demo")
-    st.markdown("Upload an image and click **Predict** to see top-3 predictions with confidence percentages.")
-    
-    demo_file = st.file_uploader("Upload an image for demo", type=["jpg","jpeg","png"], key="demo")
-    
-    if demo_file and model:
-        st.image(demo_file, caption="Uploaded Image", use_column_width=True)
-        
-        if st.button("Predict on Demo Image"):
-            with st.spinner("Predicting..."):
-                results = predict_top3(demo_file)
-                st.subheader("Top 3 Breed Predictions")
-                for breed, prob in results:
-                    st.write(f"**{breed}** : {prob*100:.2f}% confidence")
-                    display_breed_card(breed, prob)
+    st.markdown("""
+    Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
+    Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
+    """)
+    st.image("https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=1200&q=80", use_column_width=True)
 
 # =========================
 # About Page
 # =========================
 elif choice == "About":
-    st.title("ℹ️ About This App")
-    st.markdown("""
-    **Purpose:** Help Field Level Workers (FLWs) identify Indian cattle and buffalo breeds using AI.  
+    st.title("ℹ️ About Breeds")
+    st.markdown("### 🐂 Cattle Breeds")
+    cattle_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "cattle"]
+    st.write(", ".join(cattle_breeds))
+    
+    st.markdown("### 🐃 Buffalo Breeds")
+    buffalo_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "buffalo"]
+    st.write(", ".join(buffalo_breeds))
 
-    **Dataset:** Includes 10 major Indian breeds: 5 cattle and 5 buffalo.  
-
-    **Model:** MobileNetV2 fine-tuned for up to 50 epochs on training data.  
-
-    **Hackathon:** Demo submission showcasing breed recognition and real-time predictions.  
-
-    **How to use:**  
-    1. Go to **Home** → upload an image → click **Predict Breed**  
-    2. Or go to **Model Demo** → upload image → click **Predict on Demo Image**  
-    3. View **top-3 predictions** with breed details
-    """)
+# =========================
+# Model Prediction
+# =========================
+elif choice == "Model Prediction":
+    st.title("🔍 Predict Breed")
+    st.markdown("Upload an image of a cow or buffalo and click **Predict** to see top-3 breed predictions.")
+    
+    uploaded_file = st.file_uploader("Upload an image", type=["jpg","jpeg","png"])
+    
+    if uploaded_file and model:
+        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+        if st.button("Predict"):
+            with st.spinner("Predicting..."):
+                results = predict_top3(uploaded_file)
+                st.subheader("Top 3 Predictions")
+                cols = st.columns(3)
+                for i, (breed, prob) in enumerate(results):
+                    with cols[i]:
+                        display_breed_card(breed, prob)
