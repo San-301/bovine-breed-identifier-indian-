@@ -84,11 +84,15 @@ else:
     class_names = []
 
 # =========================
-# Load Model
+# Load Model safely
 # =========================
 model = None
 if os.path.exists(MODEL_PATH):
-    model = tf.keras.models.load_model(MODEL_PATH)
+    try:
+        model = tf.keras.models.load_model(MODEL_PATH, compile=False)  # Safe loading
+        st.success("Model loaded successfully!")
+    except Exception as e:
+        st.error(f"Failed to load model: {e}")
 else:
     st.warning(f"Model not found at {MODEL_PATH}. Please upload it to the repo.")
 
