@@ -56,24 +56,28 @@ div.stButton > button:hover {
 .breed-card {
     border: 1px solid #e5e7eb;
     border-radius: 16px;
-    padding: 20px;
+    padding: 24px;
     background: white;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-    margin-bottom: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    margin-bottom: 18px;
     transition: transform 0.2s ease;
+    max-height: 300px; /* Increased height */
+    overflow-y: auto;
 }
 .breed-card:hover {
     transform: translateY(-4px);
 }
 .breed-title {
-    font-size: 1.25rem;
+    font-size: 1.3rem;
     font-weight: 700;
     margin-bottom: 0.5em;
+    color: #111827;
 }
 .probability {
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
     color: #2563eb;
+    margin-bottom: 0.6em;
 }
 </style>
 """, unsafe_allow_html=True)
@@ -104,7 +108,7 @@ model = None
 if os.path.exists(MODEL_PATH):
     model = tf.keras.models.load_model(MODEL_PATH)
 else:
-    st.warning(f"Model not found at {MODEL_PATH}. Please upload it to the repo.")
+    st.warning(f"⚠️ Model not found at {MODEL_PATH}. Please upload it to the repo.")
 
 # =========================
 # Helper Functions
@@ -144,10 +148,11 @@ if choice == "Home":
     st.title("🐄 Indian Cattle & Buffalo Breed Identifier")
     st.markdown("""
     ### Empowering Field Workers  
-    Upload an image of cattle or buffalo and let our AI model identify the **top 3 most probable breeds** with details.  
+    Capture or upload an image of cattle or buffalo and let our AI model identify the **top 3 most probable breeds** with details.  
     This tool is built to support **field-level workers, veterinarians, and farmers**.
     """)
-    st.image("https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=1200&q=80",
+    # Your GitHub image
+    st.image("https://raw.githubusercontent.com/San-301/bovine-breed-identifier-indian-/main/images.png",
              use_column_width=True, caption="Supporting Indian Livestock Heritage")
 
 # =========================
@@ -170,16 +175,23 @@ elif choice == "About":
 # =========================
 elif choice == "Model Prediction":
     st.title("🔍 Predict Breed")
-    st.markdown("Upload an image of a **cow or buffalo** and click **Predict** to view the top-3 breed predictions.")
+    st.markdown("Capture a photo of a **cow or buffalo** or upload an image to get predictions.")
 
-    uploaded_file = st.file_uploader("📷 Upload an image", type=["jpg","jpeg","png"])
+    # Camera Input
+    captured_file = st.camera_input("📷 Take a picture")
 
-    if uploaded_file and model:
-        st.image(uploaded_file, caption="Uploaded Image", use_column_width=True)
+    # File Upload
+    uploaded_file = st.file_uploader("📂 Or upload an image", type=["jpg","jpeg","png"])
+
+    # Pick whichever source is available
+    img_source = captured_file if captured_file else uploaded_file
+
+    if img_source and model:
+        st.image(img_source, caption="Input Image", use_column_width=True)
 
         if st.button("🚀 Predict"):
             with st.spinner("Analyzing image..."):
-                results = predict_top3(uploaded_file)
+                results = predict_top3(img_source)
                 st.subheader("✨ Top 3 Predictions")
                 for breed, prob in results:
                     display_breed_card(breed, prob)
