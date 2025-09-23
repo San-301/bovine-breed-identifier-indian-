@@ -15,6 +15,56 @@ st.set_page_config(
 )
 
 # =========================
+# Custom CSS for Black Sidebar
+# =========================
+st.markdown("""
+<style>
+/* Sidebar background black */
+section[data-testid="stSidebar"] {
+    background-color: #000000; /* Black sidebar */
+    color: #ffffff;
+}
+
+/* Sidebar radio button labels */
+section[data-testid="stSidebar"] .stRadio label {
+    color: #ffffff !important; /* White text */
+    font-weight: bold;
+    font-size: 16px;
+}
+
+/* Sidebar radio button hover effect */
+section[data-testid="stSidebar"] .stRadio label:hover {
+    color: #2563eb !important; /* Hover color */
+    cursor: pointer;
+}
+
+/* Highlight "Model Prediction" on hover with rocket */
+.stRadio label[for^="Model Prediction"]:hover::after {
+    content: " 🚀";
+}
+
+/* Breed card */
+.breed-card {
+    border-radius: 12px;
+    padding: 12px;
+    background-color: #f0f0f0;
+    margin-bottom: 10px;
+    overflow:auto;
+}
+
+/* Breed colored box */
+.breed-box {
+    display:inline-block;
+    padding:10px 15px;
+    margin:5px;
+    border-radius:8px;
+    color:white;
+    font-weight:bold;
+}
+</style>
+""", unsafe_allow_html=True)
+
+# =========================
 # Paths
 # =========================
 MODEL_FILENAME = "breed_classifier_mobilenet.h5"
@@ -57,54 +107,36 @@ def predict_top3(img_file):
 def display_breed_card(breed, prob):
     info = breed_info.get(breed, {})
     border_color = "#28a745" if prob>0.7 else "#ffc107" if prob>0.5 else "#dc3545"
+    title_color = border_color
+    bg_color = "#ffffff"
+    text_color = "#000000"
+
     st.markdown(f"""
     <div style="
         border:2px solid {border_color};
         padding:15px;
         border-radius:12px;
         margin-bottom:10px;
-        background-color:#ffffff;
-        color:#000000;
+        background-color:{bg_color};
+        color:{text_color};
         word-wrap: break-word;
         overflow:auto;
         max-height: 220px;">
-        <h3 style="color:{border_color}; margin-bottom:10px;">{breed} - {prob*100:.2f}%</h3>
+        <h3 style="color:{title_color}; margin-bottom:10px;">{breed} - {prob*100:.2f}%</h3>
         <b>Type:</b> {info.get('Type','N/A')}<br>
         <b>Origin:</b> {info.get('Origin','N/A')}<br>
         <b>Description:</b> {info.get('Description','N/A')}<br>
     </div>
     """, unsafe_allow_html=True)
 
+def breed_box(breed, color="#2563eb"):
+    st.markdown(f"""
+        <div class="breed-box" style="background-color:{color}">{breed}</div>
+    """, unsafe_allow_html=True)
+
 # =========================
-# Sidebar Navigation with Black Background
+# Sidebar Navigation
 # =========================
-st.markdown("""
-    <style>
-    /* Sidebar background */
-    [data-testid="stSidebar"] {
-        background-color: #000000;
-        color: #ffffff;
-    }
-
-    /* Sidebar radio button text */
-    .stRadio > div > label {
-        color: #ffffff;
-    }
-
-    /* Sidebar radio button hover effect */
-    .stRadio > div > label:hover {
-        background-color: #333333;
-    }
-
-    /* Selected menu option highlight */
-    .stRadio > div > label input:checked + div {
-        background-color: #1a73e8;
-        color: #ffffff;
-        font-weight: bold;
-    }
-    </style>
-""", unsafe_allow_html=True)
-
 menu = ["Home", "About", "Model Prediction"]
 choice = st.sidebar.radio("Navigation", menu)
 
@@ -117,7 +149,7 @@ if choice == "Home":
     Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
     Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
     """)
-    st.image("https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&w=1200&q=80", use_column_width=True)
+    st.image("https://play-lh.googleusercontent.com/3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg", use_column_width=True)
 
 # =========================
 # About Page
@@ -126,37 +158,38 @@ elif choice == "About":
     st.title("ℹ️ About Breeds")
     st.markdown("### 🐂 Cattle Breeds")
     cattle_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "cattle"]
-    st.write(", ".join(cattle_breeds) if cattle_breeds else "No cattle breeds found.")
+    for breed in cattle_breeds:
+        breed_box(breed, color="#28a745")  # green boxes
     
     st.markdown("### 🐃 Buffalo Breeds")
     buffalo_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "buffalo"]
-    st.write(", ".join(buffalo_breeds) if buffalo_breeds else "No buffalo breeds found.")
+    for breed in buffalo_breeds:
+        breed_box(breed, color="#2563eb")  # blue boxes
 
 # =========================
 # Model Prediction
 # =========================
 elif choice == "Model Prediction":
     st.title("🔍 Predict Breed")
-    st.markdown("Upload an image or take a photo of a cow or buffalo to get top-3 breed predictions.")
+    st.markdown("Upload an image or use your camera to predict the breed.")
     
-    # Camera Input
-    captured_file = st.camera_input("📷 Take a picture")
-    
-    # File Upload
-    uploaded_file = st.file_uploader("📂 Or upload an image", type=["jpg","jpeg","png"])
-    
-    # Use whichever is available
-    img_source = captured_file if captured_file else uploaded_file
-    
-    if img_source and model:
-        st.image(img_source, caption="Input Image", use_column_width=True)
-        if st.button("Predict"):
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        uploaded_file = st.file_uploader("Upload an image", type=["jpg","jpeg","png"])
+    with col2:
+        camera_input = st.camera_input("Capture image")
+
+    img_file = uploaded_file if uploaded_file else camera_input
+
+    if img_file and model:
+        st.image(img_file, caption="Input Image", use_column_width=True)
+        if st.button("🚀 Predict"):
             with st.spinner("Predicting..."):
-                results = predict_top3(img_source)
+                results = predict_top3(img_file)
                 st.subheader("Top 3 Predictions")
                 cols = st.columns(3)
                 for i, (breed, prob) in enumerate(results):
                     with cols[i]:
                         display_breed_card(breed, prob)
-    elif img_source and not model:
+    elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
