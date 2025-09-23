@@ -56,19 +56,28 @@ def predict_top3(img_file):
     return [(class_names[i], float(preds[i])) for i in top3_idx]
 
 def display_breed_card(breed, prob):
+    """Display breed details in a styled card with visible text."""
     info = breed_info.get(breed, {})
-    color = "#28a745" if prob>0.7 else "#ffc107" if prob>0.5 else "#dc3545"
+    # Color for the border and title
+    border_color = "#28a745" if prob>0.7 else "#ffc107" if prob>0.5 else "#dc3545"
+    title_color = border_color
+    # Card background
+    bg_color = "#ffffff"
+    # Text color
+    text_color = "#000000"  # black for readability
+
     st.markdown(f"""
     <div style="
-        border:2px solid {color};
+        border:2px solid {border_color};
         padding:15px;
         border-radius:12px;
         margin-bottom:10px;
-        background-color:#f9f9f9;
-        overflow:auto;
+        background-color:{bg_color};
+        color:{text_color};
         word-wrap: break-word;
-        max-height: 200px;">
-        <h3 style="color:{color}">{breed} - {prob*100:.2f}%</h3>
+        overflow:auto;
+        max-height: 220px;">
+        <h3 style="color:{title_color}; margin-bottom:10px;">{breed} - {prob*100:.2f}%</h3>
         <b>Type:</b> {info.get('Type','N/A')}<br>
         <b>Origin:</b> {info.get('Origin','N/A')}<br>
         <b>Description:</b> {info.get('Description','N/A')}<br>
@@ -124,3 +133,4 @@ elif choice == "Model Prediction":
                 for i, (breed, prob) in enumerate(results):
                     with cols[i]:
                         display_breed_card(breed, prob)
+
