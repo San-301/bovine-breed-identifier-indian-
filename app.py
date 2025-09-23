@@ -149,7 +149,10 @@ if choice == "Home":
     Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
     Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
     """)
-    st.image("https://play-lh.googleusercontent.com/3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg", use_column_width=True)
+    st.image(
+        "https://play-lh.googleusercontent.com/3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg",
+        use_container_width=True
+    )
 
 # =========================
 # About Page
@@ -182,7 +185,7 @@ elif choice == "Model Prediction":
     img_file = uploaded_file if uploaded_file else camera_input
 
     if img_file and model:
-        st.image(img_file, caption="Input Image", use_column_width=True)
+        st.image(img_file, caption="Input Image", use_container_width=True)
         if st.button("🚀 Predict"):
             with st.spinner("Predicting..."):
                 results = predict_top3(img_file)
