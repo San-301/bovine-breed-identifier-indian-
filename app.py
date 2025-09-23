@@ -21,22 +21,21 @@ st.markdown("""
 <style>
 /* Sidebar */
 section[data-testid="stSidebar"] {
-    background-color: #ffffff;
-    color: black;
+    background-color: #ffffff; /* White sidebar */
+    color: black; /* Text color */
+}
+section[data-testid="stSidebar"] .css-1d391kg,
+section[data-testid="stSidebar"] .stRadio label {
+    color: black !important; /* Ensure radio labels are visible */
     font-weight: bold;
+    font-size: 16px;
 }
-section[data-testid="stSidebar"] .css-1d391kg {
-    color: black;
-}
-section[data-testid="stSidebar"] .stRadio > label:hover {
-    color: #2563eb;
+section[data-testid="stSidebar"] .stRadio label:hover {
+    color: #2563eb !important; /* Hover color */
     cursor: pointer;
 }
 
-/* Sidebar option hover for Prediction tab */
-.stRadio label[for^="Model Prediction"] {
-    position: relative;
-}
+/* Highlight "Model Prediction" on hover with rocket */
 .stRadio label[for^="Model Prediction"]:hover::after {
     content: " 🚀";
 }
@@ -61,6 +60,7 @@ section[data-testid="stSidebar"] .stRadio > label:hover {
 }
 </style>
 """, unsafe_allow_html=True)
+
 
 # =========================
 # Paths
@@ -191,3 +191,4 @@ elif choice == "Model Prediction":
                         display_breed_card(breed, prob)
     elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
+
