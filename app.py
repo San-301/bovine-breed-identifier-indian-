@@ -82,7 +82,11 @@ else:
 # =========================
 model = None
 if os.path.exists(MODEL_PATH):
-    model = tf.keras.models.load_model(MODEL_PATH)
+    try:
+        model = tf.keras.models.load_model(MODEL_PATH, compile=False)
+        st.success("✅ Model loaded successfully!")
+    except Exception as e:
+        st.error(f"Error loading model: {e}")
 else:
     st.warning(f"⚠️ Model not found at {MODEL_PATH}. Please upload it to the repo.")
 
@@ -170,10 +174,10 @@ elif choice == "Model Prediction":
     # Pick whichever source is available
     img_source = captured_file if captured_file else uploaded_file
 
-    if img_source and model:
+    if img_source:
         st.image(img_source, caption="Input Image", use_column_width=True)
 
-        if st.button("🚀 Predict"):
+        if model and st.button("🚀 Predict"):
             with st.spinner("Analyzing image..."):
                 results = predict_top3(img_source)
                 st.subheader("✨ Top 3 Predictions")
@@ -183,3 +187,5 @@ elif choice == "Model Prediction":
                 for col, (breed, prob) in zip(cols, results):
                     with col:
                         display_breed_card(breed, prob)
+        elif not model:
+            st.warning("⚠️ Model not loaded. Cannot predict.")
