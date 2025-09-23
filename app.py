@@ -13,7 +13,7 @@ st.set_page_config(page_title="Bovine Breed Identifier", layout="wide")
 # =========================
 # Model & Data Paths
 # =========================
-MODEL_FILENAME = "breed_classifier_mobilenet.h5"  # Use .h5 for Streamlit Cloud
+MODEL_FILENAME = "breed_classifier_mobilenet.h5"  # Upload this file to repo root
 MODEL_PATH = os.path.join(os.getcwd(), MODEL_FILENAME)
 BREED_JSON = os.path.join(os.getcwd(), "breeds.json")
 
@@ -21,7 +21,8 @@ BREED_JSON = os.path.join(os.getcwd(), "breeds.json")
 if os.path.exists(BREED_JSON):
     with open(BREED_JSON, "r") as f:
         breed_info = json.load(f)
-    class_names = list(breed_info.keys())
+    # FIX: ensure alphabetical order (matches TensorFlow training order)
+    class_names = sorted(breed_info.keys())
 else:
     st.error(f"Breed info JSON not found at {BREED_JSON}")
     breed_info = {}
@@ -38,6 +39,7 @@ else:
 # Helper Functions
 # =========================
 def predict_top3(img_file):
+    """Predict top-3 breeds for an uploaded image."""
     img = image.load_img(img_file, target_size=(224,224))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
@@ -47,6 +49,7 @@ def predict_top3(img_file):
     return [(class_names[i], float(preds[i])) for i in top3_idx]
 
 def display_breed_card(breed, prob):
+    """Display breed details in a styled card."""
     info = breed_info.get(breed, {})
     color = "#28a745" if prob>0.7 else "#ffc107" if prob>0.5 else "#dc3545"
     st.markdown(f"""
@@ -114,9 +117,9 @@ elif choice == "About":
 
     **Dataset:** Includes 10 major Indian breeds: 5 cattle and 5 buffalo.  
 
-    **Model:** MobileNetV2 fine-tuned for 40 epochs on training data.  
+    **Model:** MobileNetV2 fine-tuned for up to 50 epochs on training data.  
 
-    **Hackathon:** Demo submission for hackathon showcasing breed recognition and real-time predictions.  
+    **Hackathon:** Demo submission showcasing breed recognition and real-time predictions.  
 
     **How to use:**  
     1. Go to **Home** → upload an image → click **Predict Breed**  
