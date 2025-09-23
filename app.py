@@ -21,23 +21,20 @@ st.markdown("""
 <style>
 /* Sidebar */
 section[data-testid="stSidebar"] {
-    background-color: #ffffff; /* White sidebar */
-    color: black; /* Text color */
-}
-section[data-testid="stSidebar"] .css-1d391kg,
-section[data-testid="stSidebar"] .stRadio label {
-    color: black !important; /* Ensure radio labels are visible */
+    background-color: #ffffff;
+    color: black;
     font-weight: bold;
-    font-size: 16px;
 }
-section[data-testid="stSidebar"] .stRadio label:hover {
-    color: #2563eb !important; /* Hover color */
+section[data-testid="stSidebar"] .css-1d391kg {
+    color: black;
+}
+section[data-testid="stSidebar"] .stRadio > label {
+    color: black;
+    font-weight: bold;
+}
+section[data-testid="stSidebar"] .stRadio > label:hover {
+    color: #2563eb;
     cursor: pointer;
-}
-
-/* Highlight "Model Prediction" on hover with rocket */
-.stRadio label[for^="Model Prediction"]:hover::after {
-    content: " 🚀";
 }
 
 /* Breed card */
@@ -48,19 +45,8 @@ section[data-testid="stSidebar"] .stRadio label:hover {
     margin-bottom: 10px;
     overflow:auto;
 }
-
-/* Breed colored box */
-.breed-box {
-    display:inline-block;
-    padding:10px 15px;
-    margin:5px;
-    border-radius:8px;
-    color:white;
-    font-weight:bold;
-}
 </style>
 """, unsafe_allow_html=True)
-
 
 # =========================
 # Paths
@@ -118,18 +104,12 @@ def display_breed_card(breed, prob):
         background-color:{bg_color};
         color:{text_color};
         word-wrap: break-word;
-        overflow:auto;
-        max-height: 220px;">
+        overflow:auto;">
         <h3 style="color:{title_color}; margin-bottom:10px;">{breed} - {prob*100:.2f}%</h3>
         <b>Type:</b> {info.get('Type','N/A')}<br>
         <b>Origin:</b> {info.get('Origin','N/A')}<br>
         <b>Description:</b> {info.get('Description','N/A')}<br>
     </div>
-    """, unsafe_allow_html=True)
-
-def breed_box(breed, color="#2563eb"):
-    st.markdown(f"""
-        <div class="breed-box" style="background-color:{color}">{breed}</div>
     """, unsafe_allow_html=True)
 
 # =========================
@@ -147,22 +127,14 @@ if choice == "Home":
     Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
     Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
     """)
-    st.image("https://play-lh.googleusercontent.com/3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg", use_column_width=True)
+    st.image("https://upload.wikimedia.org/wikipedia/commons/4/43/Cow_farm.jpg", use_column_width=True)
 
 # =========================
 # About Page
 # =========================
 elif choice == "About":
     st.title("ℹ️ About Breeds")
-    st.markdown("### 🐂 Cattle Breeds")
-    cattle_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "cattle"]
-    for breed in cattle_breeds:
-        breed_box(breed, color="#28a745")  # green boxes
-    
-    st.markdown("### 🐃 Buffalo Breeds")
-    buffalo_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "buffalo"]
-    for breed in buffalo_breeds:
-        breed_box(breed, color="#2563eb")  # blue boxes
+    st.markdown("This app contains information about Indian **cattle** and **buffalo** breeds. You can view Type, Origin, and Description for each breed in the Model Prediction results.")
 
 # =========================
 # Model Prediction
@@ -191,4 +163,3 @@ elif choice == "Model Prediction":
                         display_breed_card(breed, prob)
     elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
-
