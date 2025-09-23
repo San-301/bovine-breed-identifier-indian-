@@ -8,7 +8,6 @@ This tool helps Field Level Workers (FLWs) identify Indian cattle and buffalo br
 - Breed info card (Type, Origin, Description)
 - Mobile-friendly, color-coded confidence
 
-## How to Run
+## How to Use
 ```bash
-pip install -r requirements.txt
-streamlit run app.py
+https://breeddetection.streamlit.app/
