@@ -156,6 +156,8 @@ if choice == "Home":
     st.markdown("""
     Welcome! This app helps Field Level Workers (FLWs) identify **Indian cattle and buffalo breeds**.  
     Upload an image in the **Model Prediction** tab to get the top-3 breed predictions with details.
+
+    Note: Currently, the model has been trained exclusively on 10 breeds, which are listed in the 'About' section.
     """)
     st.image(
         "https://play-lh.googleusercontent.com/3QdX1hXthh-8mlOSIKHX-5enC9Ml0exx2aWHOdKiagUXMrQfL8VDEzQPPnTjJvsSvg",
@@ -204,3 +206,4 @@ elif choice == "Model Prediction":
                         display_breed_card(breed, prob)
     elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
+
