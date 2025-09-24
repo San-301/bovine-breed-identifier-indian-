@@ -173,7 +173,7 @@ if choice == "Home":
 # =========================
 elif choice == "About":
     st.title("ℹ️ About Breeds")
-    st.markdown("“The following breeds were used to train the model.")
+    st.markdown("The following breeds were used to train the model.")
     
     st.markdown("### 🐂 Cattle Breeds")
     cattle_breeds = [k for k, v in breed_info.items() if v.get("Type", "").lower() == "cattle"]
@@ -211,6 +211,7 @@ elif choice == "Model Prediction":
                         display_breed_card(breed, prob)
     elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
+
 
 
 
