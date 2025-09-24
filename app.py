@@ -137,10 +137,12 @@ def display_breed_card(breed, prob):
     </div>
     """, unsafe_allow_html=True)
 
-def breed_box(breed, color="#2563eb"):
-    st.markdown(f"""
-        <div class="breed-box" style="background-color:{color}">{breed}</div>
-    """, unsafe_allow_html=True)
+def breed_boxes(breeds, color):
+    boxes_html = "".join([
+        f'<div class="breed-box" style="background-color:{color}">{breed}</div>'
+        for breed in breeds
+    ])
+    st.markdown(boxes_html, unsafe_allow_html=True)
 
 # =========================
 # Sidebar Navigation
@@ -172,15 +174,14 @@ if choice == "Home":
 elif choice == "About":
     st.title("ℹ️ About Breeds")
     st.markdown("“The following breeds were used to train the model.")
+    
     st.markdown("### 🐂 Cattle Breeds")
-    cattle_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "cattle"]
-    for breed in cattle_breeds:
-        breed_box(breed, color="#28a745", end = " ")  # green boxes
+    cattle_breeds = [k for k, v in breed_info.items() if v.get("Type", "").lower() == "cattle"]
+    breed_boxes(cattle_breeds, color="#28a745")  # green boxes
     
     st.markdown("### 🐃 Buffalo Breeds")
-    buffalo_breeds = [k for k, v in breed_info.items() if v["Type"].lower() == "buffalo"]
-    for breed in buffalo_breeds:
-        breed_box(breed, color="#2563eb", end = " ")  # blue boxes
+    buffalo_breeds = [k for k, v in breed_info.items() if v.get("Type", "").lower() == "buffalo"]
+    breed_boxes(buffalo_breeds, color="#2563eb")  # blue boxes
 
 
 # =========================
@@ -210,6 +211,7 @@ elif choice == "Model Prediction":
                         display_breed_card(breed, prob)
     elif img_file and not model:
         st.warning("⚠️ Model not loaded. Cannot predict.")
+
 
 
 
